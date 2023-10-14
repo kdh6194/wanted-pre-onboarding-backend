@@ -9,6 +9,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -65,4 +66,17 @@ public class EmployeeService {
         }
     }
 
+    public List<Company> getAllJobPosts() {
+        return employeeRepository.findAll();
+    }
+
+    public Company getJobPost(int id) {
+        Optional<Company> existingCompany = employeeRepository.findById(id);
+
+        if (existingCompany.isPresent()) {
+            return existingCompany.get();
+        } else {
+            throw new RuntimeException("회사가 없습니다.");
+        }
+    }
 }
