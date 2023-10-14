@@ -1,5 +1,7 @@
 package com.acorn.wantedpreonboardingbackend.Service;
 
+import com.acorn.wantedpreonboardingbackend.Dto.CompanyMapper;
+import com.acorn.wantedpreonboardingbackend.Dto.CompanyPostReqDto;
 import com.acorn.wantedpreonboardingbackend.Dto.CompanyReqDto;
 import com.acorn.wantedpreonboardingbackend.Repository.EmployeeRepository;
 import com.acorn.wantedpreonboardingbackend.VO.Company;
@@ -11,12 +13,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class EmployeeService {
     private final EmployeeRepository employeeRepository;
+    private final CompanyMapper companyMapper;
+
     @Transactional
     public Company signUp(CompanyReqDto companyReqDto) {
         if(companyReqDto == null){
@@ -65,11 +70,19 @@ public class EmployeeService {
             throw new RuntimeException("회사가 없습니다.");
         }
     }
-
+    @Transactional(readOnly = true)
     public List<Company> getAllJobPosts() {
         return employeeRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
+    public List<CompanyPostReqDto> searchByCompanyName(String companyName) {
+        List<Company> companies =  employeeRepository.findByCompanyNameContaining(companyName);
+        return companies.stream()
+                .map(company -> this.companyMapper.convertToDto(company))
+                .collect(Collectors.toList());
+    }
+    @Transactional(readOnly = true)
     public Company getJobPost(int id) {
         Optional<Company> existingCompany = employeeRepository.findById(id);
 

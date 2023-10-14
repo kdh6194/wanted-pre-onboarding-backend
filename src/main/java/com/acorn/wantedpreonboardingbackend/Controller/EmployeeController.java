@@ -1,6 +1,7 @@
 package com.acorn.wantedpreonboardingbackend.Controller;
 
 import com.acorn.wantedpreonboardingbackend.Dto.CompanyListReqDto;
+import com.acorn.wantedpreonboardingbackend.Dto.CompanyMapper;
 import com.acorn.wantedpreonboardingbackend.Dto.CompanyPostReqDto;
 import com.acorn.wantedpreonboardingbackend.Dto.CompanyReqDto;
 import com.acorn.wantedpreonboardingbackend.Service.EmployeeService;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 @RestController("/employee")
 public class EmployeeController {
     private final EmployeeService employeeService;
+    private final CompanyMapper companyMapper;
 
     @PostMapping("/upload")
     public ResponseEntity<Map<String,String>> signUp(@RequestBody CompanyReqDto companyReqDto) {
@@ -29,7 +31,7 @@ public class EmployeeController {
        }
     }
 
-    @PutMapping("/job-postings/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<Map<String,String>> updateJobPosting(@PathVariable int id, @RequestBody CompanyReqDto companyReqDto) {
         Company isUpdate = employeeService.updateJobPost(id, companyReqDto);
         if(isUpdate != null){
@@ -39,27 +41,17 @@ public class EmployeeController {
         }
     }
 
-    @GetMapping("/job-postings/{id}")
+    @GetMapping("/list")
     public ResponseEntity<List<CompanyPostReqDto>> getAllJobPosts() {
         List<Company> companies = employeeService.getAllJobPosts();
         List<CompanyPostReqDto> companyReqDtos = companies.stream()
-                .map(this::convertToDto)
+                .map(company -> this.companyMapper.convertToDto(company))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(companyReqDtos);
     }
-    private CompanyPostReqDto convertToDto(Company company) {
-        CompanyPostReqDto dto = new CompanyPostReqDto();
-        dto.setCompany_name(company.getCompany_name());
-        dto.setCountry(company.getCountry());
-        dto.setLocation(company.getLocation());
-        dto.setPosition(company.getPosition());
-        dto.setCompensation(company.getCompensation());
-        dto.setSkill(company.getSkill());
 
-        return dto;
-    }
 
-    @GetMapping("/job-postings/{id}")
+    @GetMapping("/list/{id}")
     public ResponseEntity<CompanyListReqDto> getJobPost(@PathVariable int id) {
         Company company = employeeService.getJobPost(id);
         CompanyListReqDto companyReqDto = new CompanyListReqDto();
@@ -73,5 +65,13 @@ public class EmployeeController {
 
         return ResponseEntity.ok(companyReqDto);
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<CompanyPostReqDto>> search(@RequestParam String keyword) {
+        List<CompanyPostReqDto> result = employeeService.searchByCompanyName(keyword);
+        return ResponseEntity.ok(result);
+    }
+
+
 
 }
