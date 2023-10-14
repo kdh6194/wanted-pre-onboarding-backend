@@ -92,4 +92,8 @@ public class EmployeeService {
             throw new RuntimeException("회사가 없습니다.");
         }
     }
+
+    public void deleted(int id) {
+        employeeRepository.deleteById(id);
+    }
 }
